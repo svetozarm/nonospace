@@ -1,0 +1,25 @@
+td.cell {
+    width: 20px;
+    height: 20px;
+    border: solid 1px;
+}
+
+td.active {
+    background-color: black;
+}
+
+td.inactive {
+    background-color: white;
+}
+
+td.locked {
+    background-color: red;
+}
+
+td.hintNumber {
+  height: 20px;
+  width: 20px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: white;
+}
