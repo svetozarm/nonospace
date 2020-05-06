@@ -1,18 +1,19 @@
 {
-  "name": "nonospace",
+  "name": "nonospace-frontend",
   "version": "1.0.0",
   "description": "Nonograms for all!",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "start": "webpack-dev-server --open --mode development"
+    "start": "webpack && node ./server/www"
   },
   "author": "Svetozar Miucin",
   "license": "ISC",
   "dependencies": {
+    "express-http-proxy": "^1.6.0",
     "flux": "^3.1.3",
-    "html-webpack-plugin": "^4.2.0",
+    "morgan": "^1.10.0",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -31,6 +32,7 @@
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-react-hooks": "^2.5.1",
     "html-loader": "^1.1.0",
+    "html-webpack-plugin": "^4.3.0",
     "style-loader": "^1.1.4",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11",

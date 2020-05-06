@@ -6,6 +6,7 @@
  */
 import React, { Component } from 'react';
 import NonogramContainer from './NonogramContainer';
+import TestBackend from './TestBackend';
 import nonoStore from '../state/NonoStore';
 
 /**
@@ -37,6 +38,7 @@ class App extends Component {
       <div>
         { complete ? <h1>Huzzah!</h1> : <h1>Welcome to nono</h1>}
         <NonogramContainer />
+        <TestBackend />
       </div>
     );
   }
