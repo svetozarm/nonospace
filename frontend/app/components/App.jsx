@@ -6,8 +6,8 @@
  */
 import React, { Component } from 'react';
 import NonogramContainer from './NonogramContainer';
-import TestBackend from './TestBackend';
 import nonoStore from '../state/NonoStore';
+import RandomButton from './RandomButton';
 
 /**
  * Main App class
@@ -30,6 +30,13 @@ class App extends Component {
         complete: true,
       });
     });
+    fetch("/api/nonogram/random")
+      .then((res) => {
+        return res.json();
+      })
+      .then((resp) => {
+        nonoStore.newNonogram(resp.rows, resp.columns, resp.rowHints, resp.colHints);
+      });
   }
 
   render() {
@@ -38,7 +45,7 @@ class App extends Component {
       <div>
         { complete ? <h1>Huzzah!</h1> : <h1>Welcome to nono</h1>}
         <NonogramContainer />
-        <TestBackend />
+        <RandomButton />
       </div>
     );
   }

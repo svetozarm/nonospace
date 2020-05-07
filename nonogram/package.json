@@ -1,0 +1,11 @@
+{
+  "name": "nonogram",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Nonogram.js",
+  "scripts": {
+    "test": ""
+  },
+  "author": "",
+  "license": "ISC"
+}

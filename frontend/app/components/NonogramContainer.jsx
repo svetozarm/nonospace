@@ -4,10 +4,10 @@
  * @file NonoContainer.jsx
  * @author Svetozar Miuchin (svetozar.miuchin@gmail.com)
  */
-import React, { Component } from 'react';
-import nonoStore from '../state/NonoStore';
-import { NonoRowHints, NonoColHints } from './NonoHints';
-import NonoMatrix from './NonoMatrix';
+import React, { Component } from "react";
+import nonoStore from "../state/NonoStore";
+import { NonoRowHints, NonoColHints } from "./NonoHints";
+import NonoMatrix from "./NonoMatrix";
 
 /**
  * Component that renders the entire nonogram UI
@@ -26,9 +26,16 @@ class NonogramContainer extends Component {
    * Subscribes to "change" events from the store
    */
   componentDidMount() {
-    nonoStore.on('change', () => {
+    nonoStore.on("change", () => {
       this.setState({
         matrix: nonoStore.getMatrix(),
+      });
+    });
+    nonoStore.on("load", () => {
+      this.setState({
+        matrix: nonoStore.getMatrix(),
+        rowHints: nonoStore.getRowHints(),
+        colHints: nonoStore.getColHints(),
       });
     });
   }
