@@ -30,6 +30,13 @@ class App extends Component {
         complete: true,
       });
     });
+
+    nonoStore.on('load', () => {
+      this.setState({
+        complete: false,
+      });
+    });
+    
     fetch("/api/nonogram/random")
       .then((res) => {
         return res.json();
@@ -44,8 +51,8 @@ class App extends Component {
     return (
       <div>
         { complete ? <h1>Huzzah!</h1> : <h1>Welcome to nono</h1>}
-        <NonogramContainer />
         <RandomButton />
+        <NonogramContainer />
       </div>
     );
   }

@@ -6,22 +6,76 @@
  */
 
 /**
- * 
- * Helper function to toggle a single value.
- * If input is 0, returns 1, and vice-versa.
+ * These are the mask descriptions for encoding the value.
+ * To get the value of a certain field, one needs to bitwise AND with the
+ * mask's value, and shift right by the mask's shift.
  *
- * Contains no value checks!
- * 
- * @param {number} value The value to toggle.
+ * Done using @link getMaskedValue
  */
-const toggleValue = (value) => (value === 0 ? 1 : 0);
+const masks = {
+  VALUE: {
+    value: 0x1,
+    shift: 0,
+  },
+  LOCK: {
+    value: 0x2,
+    shift: 1,
+  },
+};
+
+/**
+ * Extracts the masked value from a compound value
+ *
+ * @param {number} value the compound value
+ * @param {Object} mask the object from the masks definitions, contains "value"
+ * and "shift" fields
+ */
+const setMaskedValue = (value, mask, bitValue) =>
+  (value & ~mask.value) | (bitValue << mask.shift);
+const getMaskedValue = (value, mask) => (value & mask.value) >> mask.shift;
+export const getValueBit = (value) => getMaskedValue(value, masks.VALUE);
+export const setValueBit = (value, bitValue) =>
+  setMaskedValue(value, masks.VALUE, bitValue);
+export const getLockBit = (value) => getMaskedValue(value, masks.LOCK);
+export const setLockBit = (value, bitValue) =>
+  setMaskedValue(value, masks.LOCK, bitValue);
+
+/**
+ * Every bit that is set in @link mask gets negated in @link value
+ *
+ * @param {number} value the original value
+ * @param {number} mask bitwise mask
+ * @returns modified value
+ */
+const toggleMaskedBit = (value, mask) => {
+  const negativeMask = ~mask.value;
+  const keepBits = value & negativeMask;
+  const toggled = ~value & mask.value;
+  return keepBits | toggled;
+};
+
+/**
+ * Helper function to toggle the VALUE field within the bitvector
+ *
+ * @param {number} value the value to toggle.
+ * @returns the modified value
+ */
+const toggleValue = (value) => toggleMaskedBit(value, masks.VALUE);
+
+/**
+ * Helper function to toggle the LOCK field within the bitvector
+ *
+ * @param {number} value the value to toggle.
+ * @returns the modified value
+ */
+const toggleLockValue = (value) => toggleMaskedBit(value, masks.LOCK);
 
 /**
  * Compares two sets of hints. They can either be row or column hints.
  * Used by the {@link Nonogram} class
- * 
- * @param {Array<number>} solutionHints 
- * @param {Array<number>} currentHints 
+ *
+ * @param {Array<number>} solutionHints
+ * @param {Array<number>} currentHints
  */
 const compareHints = (solutionHints, currentHints) => {
   for (let set = 0; set < solutionHints.length; set += 1) {
@@ -48,7 +102,8 @@ function extractArrayHints(arr) {
   const retval = [];
   const endStreak = () => {
     if (streak > 0) {
-      retval.push(streak); streak = 0;
+      retval.push(streak);
+      streak = 0;
     }
   };
 
@@ -82,9 +137,10 @@ export function nonogramFromMatrix(mat) {
   const colHints = [];
 
   for (let i = 0; i < rows; i += 1) {
-    const rowHint = extractArrayHints(mat[i]).map(
-      (n) => ({ number: n, satisfied: false }),
-    );
+    const rowHint = extractArrayHints(mat[i]).map((n) => ({
+      number: n,
+      satisfied: false,
+    }));
     rowHints.push(rowHint);
   }
   for (let i = 0; i < cols; i += 1) {
@@ -92,9 +148,10 @@ export function nonogramFromMatrix(mat) {
     for (let j = 0; j < rows; j += 1) {
       column.push(mat[j][i]);
     }
-    const colHint = extractArrayHints(column).map(
-      (n) => ({ number: n, satisfied: false }),
-    );
+    const colHint = extractArrayHints(column).map((n) => ({
+      number: n,
+      satisfied: false,
+    }));
     colHints.push(colHint);
   }
   return new Nonogram(rows, cols, rowHints, colHints);
@@ -138,11 +195,10 @@ class Nonogram {
    * @return {int} Number of cells that are non-empty in this nonogram
    */
   getTotalCells() {
-    const totalFromHints = (hints) => hints.map(
-      (arr) => arr.reduce((acc, val) => (acc + val.number), 0),
-    ).reduce(
-      (acc, val) => (acc + val),
-    );
+    const totalFromHints = (hints) =>
+      hints
+        .map((arr) => arr.reduce((acc, val) => acc + val.number, 0))
+        .reduce((acc, val) => acc + val);
 
     const rowTotal = totalFromHints(this.rowHints);
 
@@ -152,7 +208,7 @@ class Nonogram {
 
     // TODO: make this an assert
     if (rowTotal !== columnTotal) {
-      window.alert('Numbers not adding up!');
+      window.alert("Numbers not adding up!");
     }
 
     return rowTotal;
@@ -166,10 +222,16 @@ class Nonogram {
    * @param {int} column
    */
   toggleCell(row, column) {
-    const newValue = toggleValue(this.getCell(row, column));
-    this.setCell(row, column, newValue);
+    const currentValue = getValueBit(this.getCell(row, column));
+    const newValue = currentValue ? 0 : 1;
+    this.setCellValue(row, column, newValue);
   }
 
+  toggleCellLock(row, column) {
+    const currentValue = getLockBit(this.getCell(row, column));
+    const newValue = currentValue ? 0 : 1;
+    this.setCellLock(row, column, newValue);
+  }
   /**
    * Checks whether the puzzle is complete.
    * Modifies the complete field.
@@ -179,30 +241,60 @@ class Nonogram {
   checkComplete() {
     if (this.currentCells === this.totalCells) {
       const tempNono = nonogramFromMatrix(this.matrix);
-      if (compareHints(this.rowHints, tempNono.rowHints)
-                && compareHints(this.colHints, tempNono.colHints)) {
+      if (
+        compareHints(this.rowHints, tempNono.rowHints) &&
+        compareHints(this.colHints, tempNono.colHints)
+      ) {
         this.complete = true;
       }
     }
   }
 
   /**
+   * Sets the cell's lock bit value.
+   *
+   * @param {number} row
+   * @param {number} column
+   * @param {number} lockValue 0 or 1 value for the bit vector field
+   */
+  setCellLock(row, column, lockValue) {
+    const currentValue = this.matrix[row][column];
+    this.matrix[row][column] = setLockBit(currentValue, lockValue);
+  }
+
+  /**
+   * Gets the cell's lock value at the coordinates
+   *
+   * @param {number} row
+   * @param {number} column
+   */
+  getCellLock(row, column) {
+    const currentValue = this.matrix[row][column];
+    return getLockBit(currentValue);
+  }
+
+  /**
    * Sets the cell to the given value.
+   * Ensures the cell is not locked.
    * Also updates the count of filled cells, and calls completion check.
    *
    * @public
    * @param {int} row
    * @param {int} column
-   * @param {int} value Can be 0 or 1, for now
+   * @param {int} value 0 or 1 value for the bit vector field
    */
-  setCell(row, column, value) {
+  setCellValue(row, column, value) {
     if (this.complete) {
       return;
     }
-    if (this.matrix[row][column] !== value) {
-      this.currentCells += (value === 1 ? 1 : -1);
+    const currentValue = this.matrix[row][column];
+    if (getLockBit(currentValue)) {
+      return;
     }
-    this.matrix[row][column] = value;
+    if (getValueBit(currentValue) !== value) {
+      this.currentCells += value === 1 ? 1 : -1;
+    }
+    this.matrix[row][column] = setValueBit(currentValue, value);
     this.checkComplete();
   }
 

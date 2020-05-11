@@ -20,6 +20,7 @@ class NonoStore extends EventEmitter {
       [1, 0, 1],
       [1, 0, 0],
     ]);
+    // XXX: This is here for debugging purposes for now
     // this.nonogram = nonogramFromMatrix([
     //   [0, 1, 1, 1, 1, 1, 1],
     //   [1, 0, 1, 1, 1, 0, 0],
@@ -38,6 +39,21 @@ class NonoStore extends EventEmitter {
   setNonogram(nonogram) {
     this.nonogram = nonogram;
     this.emit("load");
+  }
+
+  loadNewNonogram(rows, columns) {
+    fetch("/api/nonogram/random")
+      .then((res) => {
+        return res.json();
+      })
+      .then((resp) => {
+        nonoStore.newNonogram(
+          resp.rows,
+          resp.columns,
+          resp.rowHints,
+          resp.colHints
+        );
+      });
   }
 
   newNonogram(rows, columns, rowHints, colHints) {
@@ -86,6 +102,11 @@ class NonoStore extends EventEmitter {
     this._testCompletion();
   }
 
+  toggleCellLock(row, column) {
+    this.nonogram.toggleCellLock(row, column);
+    this.emit("change");
+  }
+
   /**
    * Toggles the indicated cell's value.
    * Emits "change" event, and tests for completion.
@@ -94,7 +115,7 @@ class NonoStore extends EventEmitter {
    * @param {number} column
    */
   setCell(row, column, value) {
-    this.nonogram.setCell(row, column, value);
+    this.nonogram.setCellValue(row, column, value);
     // TODO: don't emit change indiscriminately
     this.emit("change");
     this._testCompletion();
@@ -108,6 +129,10 @@ class NonoStore extends EventEmitter {
    * @param {number} column
    */
   startDrag(row, column) {
+    if (this.nonogram.getCellLock(row, column)) {
+      // Don't initiate drag action if we start from a locked cell
+      return;
+    }
     this.nonogram.toggleCell(row, column);
     this.dragging = true;
     this.dragValue = this.nonogram.getCell(row, column);
@@ -140,6 +165,9 @@ class NonoStore extends EventEmitter {
       case "TOGGLE_CELL":
         this.toggleCell(action.row, action.column);
         break;
+      case "TOGGLE_CELL_LOCK":
+        this.toggleCellLock(action.row, action.column);
+        break;
       case "START_DRAG":
         this.startDrag(action.row, action.column);
         break;
@@ -152,6 +180,8 @@ class NonoStore extends EventEmitter {
       case "COMPLETE":
         this.setComplete();
         break;
+      case "LOAD_NEW":
+        this.loadNewNonogram(action.rows, action.columns);
     }
   }
 }

@@ -12,9 +12,14 @@ td.inactive {
     background-color: white;
 }
 
-td.locked {
-    background-color: red;
+td.locked.active {
+    background-color: darkslategray;
 }
+
+td.locked.inactive {
+    background-color: lightgray;
+}
+
 
 td.hintNumber {
   height: 20px;

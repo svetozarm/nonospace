@@ -6,22 +6,11 @@
  * @author Svetozar Miucin (svetozar.miuchin@gmail.com)
  */
 import React, { Component } from "react";
-import nonoStore from "../state/NonoStore";
+import * as NonoActions from "../actions/NonoActions";
 
 const RandomButton = (props) => {
   const clickHandler = () => {
-    fetch("/api/nonogram/random")
-      .then((res) => {
-        return res.json();
-      })
-      .then((resp) => {
-        nonoStore.newNonogram(
-          resp.rows,
-          resp.columns,
-          resp.rowHints,
-          resp.colHints
-        );
-      });
+    NonoActions.loadNewNonogram(4, 4);
   };
   return <button onClick={clickHandler}>Random</button>;
 };

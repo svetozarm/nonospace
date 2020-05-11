@@ -4,37 +4,35 @@
  * @file NonoMatrix.jsx
  * @author Svetozar Miuchin (svetozar.miuchin@gmail.com)
  */
-import React from 'react';
-import PropTypes from 'prop-types';
-import * as NonoActions from '../actions/NonoActions';
-
+import React from "react";
+import PropTypes from "prop-types";
+import * as NonoActions from "../actions/NonoActions";
+import { getValueBit, getLockBit } from "nonogram";
 
 /**
  * Component for displaying a single row of cells
  *
- * @param {Array} props 
+ * @param {Array} props
  */
 const NonoRow = (props) => {
   const { values } = props;
   return (
     <tr>
-      {values.map(
-        (value, i) => <NonoCell key={i} row={props.row} column={i} value={value} />,
-      )}
+      {values.map((value, i) => (
+        <NonoCell key={i} row={props.row} column={i} value={value} />
+      ))}
     </tr>
   );
 };
 
 NonoRow.propTypes = {
   row: PropTypes.number.isRequired,
-  values: PropTypes.arrayOf(
-    PropTypes.number.isRequired,
-  ).isRequired,
+  values: PropTypes.arrayOf(PropTypes.number.isRequired).isRequired,
 };
 
 /**
  * Componet for displaying a single cell
- * 
+ *
  * @param {Object} props Contains row, column, value fields
  */
 const NonoCell = (props) => {
@@ -51,11 +49,19 @@ const NonoCell = (props) => {
     NonoActions.dragOver(row, column);
   };
 
-  const clickHandler = () => {
+  const clickHandler = (e) => {
     NonoActions.toggleCell(row, column);
   };
-  let className = 'cell';
-  className += ` ${value === 0 ? 'inactive' : 'active'}`;
+
+  const rightClickHandler = (e) => {
+    e.preventDefault();
+    NonoActions.toggleLockCell(row, column);
+  };
+  const cellValue = getValueBit(value);
+  const cellLock = getLockBit(value);
+  let className = "cell";
+  className += ` ${cellValue === 0 ? "inactive" : "active"}`;
+  className += ` ${cellLock === 0 ? "" : "locked"}`;
 
   return (
     <td
@@ -65,6 +71,7 @@ const NonoCell = (props) => {
       onDragEnter={dragEnterHandler}
       row={row}
       onClick={clickHandler}
+      onContextMenu={rightClickHandler}
     />
   );
 };
@@ -77,15 +84,17 @@ NonoCell.propTypes = {
 
 /**
  * Component for displaying the entire matrix
- * 
- * @param {Array} props 
+ *
+ * @param {Array} props
  */
 const NonoMatrix = (props) => {
   const { matrix } = props;
   return (
     <table>
       <tbody>
-        {matrix.map((values, i) => <NonoRow row={i} key={i} values={values} />)}
+        {matrix.map((values, i) => (
+          <NonoRow row={i} key={i} values={values} />
+        ))}
       </tbody>
     </table>
   );
@@ -93,9 +102,7 @@ const NonoMatrix = (props) => {
 
 NonoMatrix.propTypes = {
   matrix: PropTypes.arrayOf(
-    PropTypes.arrayOf(
-      PropTypes.number.isRequired,
-    ).isRequired,
+    PropTypes.arrayOf(PropTypes.number.isRequired).isRequired
   ).isRequired,
 };
 
