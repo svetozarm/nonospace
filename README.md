@@ -9,7 +9,7 @@ The plan (for now):
 - ~~Make a nonogram class to handle the state of the puzzle~~
 - ~~Make frontend components with React to render the said state~~
 - ~~Use the flux paradigm to connect state and UI~~
-- Build a nonogram server that serves random puzzles for a start
+- ~~Build a nonogram server that serves random puzzles for a start~~
 - Extend the server to connect to a database and pull puzzles from there
 - Figure out how to automate Google Cloud Platform deployment
 - Set up the deployment with load balancers to be able to scale out
