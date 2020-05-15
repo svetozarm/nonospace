@@ -31,7 +31,7 @@ NonoRow.propTypes = {
 };
 
 /**
- * Componet for displaying a single cell
+ * Component for displaying a single cell
  *
  * @param {Object} props Contains row, column, value fields
  */
@@ -57,6 +57,7 @@ const NonoCell = (props) => {
     e.preventDefault();
     NonoActions.toggleLockCell(row, column);
   };
+  
   const cellValue = getValueBit(value);
   const cellLock = getLockBit(value);
   let className = "cell";

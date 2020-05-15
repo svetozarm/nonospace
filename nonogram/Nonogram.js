@@ -33,9 +33,11 @@ const masks = {
 const setMaskedValue = (value, mask, bitValue) =>
   (value & ~mask.value) | (bitValue << mask.shift);
 const getMaskedValue = (value, mask) => (value & mask.value) >> mask.shift;
+
 export const getValueBit = (value) => getMaskedValue(value, masks.VALUE);
 export const setValueBit = (value, bitValue) =>
   setMaskedValue(value, masks.VALUE, bitValue);
+
 export const getLockBit = (value) => getMaskedValue(value, masks.LOCK);
 export const setLockBit = (value, bitValue) =>
   setMaskedValue(value, masks.LOCK, bitValue);
@@ -232,6 +234,15 @@ class Nonogram {
     const newValue = currentValue ? 0 : 1;
     this.setCellLock(row, column, newValue);
   }
+
+  clearLocks() {
+    for (let i = 0; i < this.rows; i++) {
+      for (let j = 0; j < this.columns; j++) {
+        this.setCellLock(i, j, 0);
+      }
+    }
+  }
+
   /**
    * Checks whether the puzzle is complete.
    * Modifies the complete field.
@@ -246,6 +257,7 @@ class Nonogram {
         compareHints(this.colHints, tempNono.colHints)
       ) {
         this.complete = true;
+        this.clearLocks();
       }
     }
   }
